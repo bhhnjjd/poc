@@ -2,42 +2,36 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Loom GraphQL GET PoC</title>
+  <title>Loom GraphQL JSON PoC</title>
 </head>
 <body>
-  <h1>Loom GraphQL GET PoC</h1>
-  <p>打开浏览器 Console，查看返回的 JSON 数据。</p>
+  <h1>Loom GraphQL PoC (application/json)</h1>
+  <p>打开控制台，你会看到浏览器发起了一个带 <code>Content-Type: application/json</code> 的预检，然后被 CORS 拦截：</p>
   <script>
-    // 构造一个 GET 请求 URL，将所有参数都放在查询字符串里
-    const query = [
-      'query AtlassianLocaleResponse {',
-      '  atlassianLocaleResponse {',
-      '    localeRequiresMarketingOptIn',
-      '    locale',
-      '    __typename',
-      '  }',
-      '  __typename',
-      '}'
-    ].join(' ');
-    const params = new URLSearchParams({
+    const payload = {
       operationName: "AtlassianLocaleResponse",
-      variables: "{}",          // 空对象
-      query: query
-    });
-    const url = "https://www.loom.com/graphql?" + params.toString();
+      variables: {},
+      query: `query AtlassianLocaleResponse {
+        atlassianLocaleResponse {
+          localeRequiresMarketingOptIn
+          locale
+          __typename
+        }
+        __typename
+      }`
+    };
 
-    // GET 是简单请求，不会触发 CORS 预检
-    fetch(url)
-      .then(res => res.json())
-      .then(data => {
-        console.log("✅ GET PoC fetched:", data);
-        const pre = document.createElement("pre");
-        pre.textContent = JSON.stringify(data, null, 2);
-        document.body.appendChild(pre);
-      })
-      .catch(err => {
-        console.error("❌ PoC fetch failed:", err);
-      });
+    fetch("https://www.loom.com/graphql", {
+      method: "POST",
+      mode: "cors",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload)
+    })
+    .then(r => r.json())
+    .then(data => console.log("✅ 成功拿到数据:", data))
+    .catch(err => console.error("❌ 被 CORS 拦截:", err));
   </script>
 </body>
 </html>
